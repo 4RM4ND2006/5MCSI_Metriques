@@ -38,29 +38,45 @@ def hello_world():
 
 @app.route("/api/commits/")
 def api_commits():
-    url = "https://api.github.com/repos/OpenRSI/5MCSI_Metriques/commits"
-    response = requests.get(url)
-    commits = response.json()
+    import requests
+    from datetime import datetime
+    from collections import Counter
+    from flask import jsonify
 
+    url = "https://api.github.com/repos/OpenRSI/5MCSI_Metriques/commits"
+
+    headers = {
+        "User-Agent": "Flask-App",
+        "Accept": "application/vnd.github+json"
+    }
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        return jsonify([])
+
+    commits = response.json()
     minutes = []
 
     for commit in commits:
-        date_string = commit["commit"]["author"]["date"]
-        date_object = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ")
-        minutes.append(date_object.minute)
+        # 🔒 Sécurité : certains commits n'ont pas d'author
+        author = commit["commit"].get("author")
+        if author and "date" in author:
+            date_string = author["date"]
+            date_object = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ")
+            minutes.append(date_object.minute)
 
-    # Compte le nombre de commits par minute
-    result = Counter(minutes)
+    counts = Counter(minutes)
 
-    # Format simple pour le JS
     data = []
-    for minute, count in result.items():
+    for minute in range(60):  # 0 → 59 (plus propre pour le graphe)
         data.append({
             "minute": minute,
-            "count": count
+            "count": counts.get(minute, 0)
         })
 
     return jsonify(data)
+
 
   
 if __name__ == "__main__":
