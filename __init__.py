@@ -3,13 +3,9 @@ from flask import render_template
 from flask import json
 from datetime import datetime
 from urllib.request import urlopen
-from datetime import datetime
-from collections import Counter
-from flask import jsonify
 import sqlite3
-import requests
 
-                                                                                                                                       
+                                                                                                                                      
 app = Flask(__name__)    
 
 @app.route("/contact/")
