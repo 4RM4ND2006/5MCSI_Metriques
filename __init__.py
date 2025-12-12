@@ -39,38 +39,43 @@ def hello_world():
 
 @app.route("/api/commits/")
 def api_commits():
-    import requests
+    from urllib.request import Request, urlopen
+    import json
     from datetime import datetime
     from collections import Counter
     from flask import jsonify
 
     url = "https://api.github.com/repos/OpenRSI/5MCSI_Metriques/commits"
 
-    headers = {
-        "User-Agent": "Flask-App",
-        "Accept": "application/vnd.github+json"
-    }
+    req = Request(
+        url,
+        headers={
+            "User-Agent": "Flask-App",
+            "Accept": "application/vnd.github+json"
+        }
+    )
 
-    response = requests.get(url, headers=headers)
-
-    if response.status_code != 200:
+    try:
+        response = urlopen(req)
+        commits = json.loads(response.read().decode())
+    except Exception:
         return jsonify([])
 
-    commits = response.json()
     minutes = []
 
     for commit in commits:
-        # 🔒 Sécurité : certains commits n'ont pas d'author
         author = commit["commit"].get("author")
         if author and "date" in author:
-            date_string = author["date"]
-            date_object = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ")
+            date_object = datetime.strptime(
+                author["date"],
+                "%Y-%m-%dT%H:%M:%SZ"
+            )
             minutes.append(date_object.minute)
 
     counts = Counter(minutes)
 
     data = []
-    for minute in range(60):  # 0 → 59 (plus propre pour le graphe)
+    for minute in range(60):
         data.append({
             "minute": minute,
             "count": counts.get(minute, 0)
