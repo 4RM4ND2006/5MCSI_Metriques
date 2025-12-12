@@ -8,8 +8,8 @@ import sqlite3
 app = Flask(__name__)    
 
 @app.route("/contact/")
-def MaPremiereAPI():
-    return "<h2>Ma page de contact</h2>"
+def PageContact:
+    return render_template("contact.html")
 
 @app.route('/tawarano/')
 def meteo():
