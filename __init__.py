@@ -8,7 +8,7 @@ import sqlite3
 app = Flask(__name__)    
 
 @app.route("/contact/")
-def PageContact:
+def PageContact():
     return render_template("contact.html")
 
 @app.route('/tawarano/')
